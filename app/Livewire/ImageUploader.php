@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Http\Requests\ResizeImageRequest;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 use Livewire\Component;
