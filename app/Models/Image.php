@@ -8,6 +8,7 @@ class Image extends Model
 {
     protected $fillable = [
         'original_path',
-        'resized_path'
+        'resized_path',
+        'type'
     ];
 }

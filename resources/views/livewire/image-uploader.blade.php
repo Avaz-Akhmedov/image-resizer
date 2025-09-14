@@ -1,5 +1,10 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-lg">
+<div class="min-h-screen flex items-center justify-center bg-gray-100 relative">
+    <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-lg ку">
+
+        <a href="{{ url('/images') }}"
+           class="absolute top-4 right-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+             Мои изображения
+        </a>
 
         <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">
             Загрузите изображения
@@ -11,7 +16,8 @@
             </div>
         @endif
 
-        <input type="file" wire:model="photos" multiple
+        <input type="file" wire:model.live="newPhotos" multiple
+               id="photoInput{{ now()->timestamp }}"
                class="block w-full text-sm text-gray-600
                       file:mr-4 file:py-2 file:px-4
                       file:rounded-lg file:border-0
@@ -28,27 +34,40 @@
         @enderror
 
         <div class="mt-3 flex gap-3 flex-wrap justify-center">
-            @foreach ($photos as  $index => $photo)
-                <div class="relative group">
-                    <img src="{{ $photo->temporaryUrl() }}" class="w-28 h-28 object-cover rounded-lg shadow">
+            @foreach ($photos as $index => $photo)
+                <div class="relative group flex flex-col items-center">
+                    <img src="{{ $photo->temporaryUrl() }}"
+                         class="w-28 h-28 object-cover rounded-lg shadow mb-2">
 
                     <button wire:click="removePhoto({{ $index }})"
                             type="button"
                             class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
                         ✕
                     </button>
+
+                    <select wire:model="photoTypes.{{ $index }}"
+                            class="w-full text-sm border rounded px-2 py-1">
+                        <option value="" disabled selected>Выберите тип</option>
+                    @foreach ($availableTypes as $value => $label)
+                            <option  value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+
+                    @error('photoTypes.' . $index)
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                    @enderror
+
+
                 </div>
             @endforeach
         </div>
 
         <div class="text-center mt-5">
-            <button wire:click="save"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700text-white rounded-xl shadow transition">
+            <button type="button" wire:click="save" class="px-6 py-2 bg-blue-600 hover:bg-blue-700text-white rounded-xl shadow transition">
                 Сохранить
             </button>
 
-            <button wire:click="removeAll" type="button"
-                    class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-xl shadow transition">
+            <button wire:click="removeAll" type="button" class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-xl shadow transition">
                 Удалить все
             </button>
         </div>
