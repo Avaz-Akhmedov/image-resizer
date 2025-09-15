@@ -12,20 +12,7 @@ class ImagesGallery extends Component
     use WithPagination;
 
 
-    public function delete($id): void
-    {
 
-        $image = Image::query()->findOrFail($id);
-
-        Storage::disk('public')->delete($image->original_path);
-        Storage::disk('public')->delete($image->resized_path);
-
-        $image->delete();
-
-        session()->flash('message', 'Изображение удалено!');
-        $this->resetPage();
-
-    }
 
     public function render()
     {

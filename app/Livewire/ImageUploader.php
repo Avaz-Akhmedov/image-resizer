@@ -17,13 +17,7 @@ class ImageUploader extends Component
 
     public array $newPhotos = [];
 
-    protected array $rules = [
-        'photos' => ['required', 'array', 'min:1', 'max:10'],
-        'photos.*' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:10240'],
-        'photoTypes' => ['required', 'array'],
-        'photoTypes.*' => ['required', 'in:main,slider,layout,facade,section,client_layout'],
-    ];
-
+    public bool $showUploader = false;
 
     public array $availableTypes = [
         'main' => 'Главное изображение',
@@ -34,6 +28,15 @@ class ImageUploader extends Component
         'client_layout' => 'Клиентские планировки',
     ];
 
+
+    public function toggleUploader(): void
+    {
+        $this->showUploader = !$this->showUploader;
+
+        if (!$this->showUploader) {
+            $this->reset(['photos', 'photoTypes', 'newPhotos']);
+        }
+    }
 
     public function updatedNewPhotos(): void
     {
@@ -51,7 +54,12 @@ class ImageUploader extends Component
 
     public function save(): void
     {
-        $this->validate();
+        $this->validate([
+            'photos' => ['required', 'array', 'min:1', 'max:10'],
+            'photos.*' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:10240'],
+            'photoTypes' => ['required', 'array'],
+            'photoTypes.*' => ['required', 'in:main,slider,layout,facade,section,client_layout'],
+        ]);
 
         foreach ($this->photos as $index => $photo) {
             $filename = $photo->getClientOriginalName();
@@ -72,7 +80,7 @@ class ImageUploader extends Component
             ]);
         }
 
-        $this->reset(['photos', 'photoTypes','newPhotos']);
+        $this->reset(['photos', 'photoTypes', 'newPhotos']);
 
 
         session()->flash('message', 'Изображения сохранены (оригинал + ресайз)!');
@@ -94,9 +102,25 @@ class ImageUploader extends Component
         $this->reset(['photos', 'photoTypes']);
     }
 
+    public function delete($id): void
+    {
+
+        $image = ImageModel::query()->findOrFail($id);
+
+        Storage::disk('public')->delete($image->original_path);
+        Storage::disk('public')->delete($image->resized_path);
+
+        $image->delete();
+
+        session()->flash('message', 'Изображение удалено!');
+
+    }
+
     public function render()
     {
-        return view('livewire.image-uploader');
+        $images = ImageModel::query()->latest()->paginate(16);
+
+        return view('livewire.image-uploader',compact('images'));
     }
 
 }
